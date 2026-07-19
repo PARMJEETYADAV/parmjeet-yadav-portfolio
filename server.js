@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs/promises';
 import path from 'path';
+import os from 'os'; // Added to resolve the temporary directory path
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,10 +16,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 app.use(express.json());
 
-const dataDir = path.join(__dirname, 'data');
-const profilePath = path.join(dataDir, 'portfolio.json');
-const linkedinPath = path.join(dataDir, 'linkedin.json');
-const cachePath = path.join(dataDir, 'cache.json');
+// FIXED: Adjust paths dynamically for local vs serverless production environment
+const isProd = process.env.NODE_ENV === 'production';
+const dataDir = isProd ? path.join(os.tmpdir(), 'data') : path.join(__dirname, 'data');
+
+const profilePath = path.join(__dirname, 'data', 'portfolio.json'); // Keep base read data local
+const linkedinPath = isProd ? path.join(dataDir, 'linkedin.json') : path.join(__dirname, 'data', 'linkedin.json');
+const cachePath = isProd ? path.join(dataDir, 'cache.json') : path.join(__dirname, 'data', 'cache.json');
 
 let state = {
     profile: {},
@@ -43,6 +47,17 @@ async function readJson(filePath, fallback = {}) {
         const raw = await fs.readFile(filePath, 'utf8');
         return JSON.parse(raw);
     } catch {
+        // If file doesn't exist in /tmp on first boot, fall back to root repo file if possible
+        if (isProd && filePath !== profilePath) {
+            try {
+                const baseName = path.basename(filePath);
+                const localFallback = path.join(__dirname, 'data', baseName);
+                const raw = await fs.readFile(localFallback, 'utf8');
+                return JSON.parse(raw);
+            } catch {
+                return fallback;
+            }
+        }
         return fallback;
     }
 }
@@ -214,6 +229,8 @@ async function syncSources() {
         await syncGitHub();
         await syncLinkedIn();
         state.syncedAt = new Date().toISOString();
+        
+        // FIXED: Safely write cache files inside the permissible environment path
         await fs.mkdir(dataDir, { recursive: true });
         await fs.writeFile(cachePath, JSON.stringify({
             syncedAt: state.syncedAt,
@@ -295,7 +312,10 @@ app.post('/api/linkedin-update', async (req, res) => {
         ].slice(0, 6),
     };
 
+    // FIXED: Writes successfully inside permissions parameters now
+    await fs.mkdir(dataDir, { recursive: true });
     await fs.writeFile(linkedinPath, JSON.stringify(updated, null, 2));
+    
     state.profile = { ...state.profile, ...updated.profile };
     state.linkedinHighlights = updated.highlights;
     state.linkedinActivity = updated.activity;
@@ -370,17 +390,18 @@ app.post('/api/webhooks/linkedin', async (req, res) => {
     res.json({ ok: true, received: entry });
 });
 
-if (process.env.NODE_ENV !== 'production') {
+// FIXED: Condition block wraps listener + background sync to drop execution payload on Vercel
+if (!isProd) {
     app.listen(port, () => {
         console.log(`Portfolio SSR server running at http://localhost:${port}`);
     });
-}
 
-setInterval(() => {
-    syncSources().catch((error) => {
-        state.lastError = error.message;
-    });
-}, 1000 * 60 * 2);
+    setInterval(() => {
+        syncSources().catch((error) => {
+            state.lastError = error.message;
+        });
+    }, 1000 * 60 * 2);
+}
 
 app.use((req, res) => {
     res.status(404).send('Page not found');
