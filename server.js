@@ -370,12 +370,16 @@ app.post('/api/webhooks/linkedin', async (req, res) => {
     res.json({ ok: true, received: entry });
 });
 
-app.listen(port, () => {
-    console.log(`Portfolio SSR server running at http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Portfolio SSR server running at http://localhost:${port}`);
+    });
+}
 
 setInterval(() => {
     syncSources().catch((error) => {
         state.lastError = error.message;
     });
 }, 1000 * 60 * 2);
+
+export default app;
