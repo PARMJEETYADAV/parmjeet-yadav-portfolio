@@ -382,4 +382,8 @@ setInterval(() => {
     });
 }, 1000 * 60 * 2);
 
+app.use((req, res) => {
+    res.status(404).send('Page not found');
+});
+
 export default app;
