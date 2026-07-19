@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os'; // Added to resolve the temporary directory path
+import os from 'os';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,13 +16,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// FIXED: Adjust paths dynamically for local vs serverless production environment
-const isProd = process.env.NODE_ENV === 'production';
-const dataDir = isProd ? path.join(os.tmpdir(), 'data') : path.join(__dirname, 'data');
+// Identify if running live on Vercel
+const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+const dataDir = isVercel ? path.join(os.tmpdir(), 'data') : path.join(__dirname, 'data');
 
-const profilePath = path.join(__dirname, 'data', 'portfolio.json'); // Keep base read data local
-const linkedinPath = isProd ? path.join(dataDir, 'linkedin.json') : path.join(__dirname, 'data', 'linkedin.json');
-const cachePath = isProd ? path.join(dataDir, 'cache.json') : path.join(__dirname, 'data', 'cache.json');
+const profilePath = path.join(__dirname, 'data', 'portfolio.json');
+const linkedinPath = isVercel ? path.join(dataDir, 'linkedin.json') : path.join(__dirname, 'data', 'linkedin.json');
+const cachePath = isVercel ? path.join(dataDir, 'cache.json') : path.join(__dirname, 'data', 'cache.json');
 
 let state = {
     profile: {},
@@ -47,18 +47,15 @@ async function readJson(filePath, fallback = {}) {
         const raw = await fs.readFile(filePath, 'utf8');
         return JSON.parse(raw);
     } catch {
-        // If file doesn't exist in /tmp on first boot, fall back to root repo file if possible
-        if (isProd && filePath !== profilePath) {
-            try {
-                const baseName = path.basename(filePath);
-                const localFallback = path.join(__dirname, 'data', baseName);
-                const raw = await fs.readFile(localFallback, 'utf8');
-                return JSON.parse(raw);
-            } catch {
-                return fallback;
-            }
+        // Fallback to embedded repo files if /tmp directory is empty on boot
+        try {
+            const baseName = path.basename(filePath);
+            const localFallback = path.join(__dirname, 'data', baseName);
+            const raw = await fs.readFile(localFallback, 'utf8');
+            return JSON.parse(raw);
+        } catch {
+            return fallback;
         }
-        return fallback;
     }
 }
 
@@ -71,10 +68,7 @@ function toTitleCase(text) {
 }
 
 function normalizeLinkedInExperience(items = []) {
-    if (!Array.isArray(items)) {
-        return [];
-    }
-
+    if (!Array.isArray(items)) return [];
     return items.map((item) => {
         if (typeof item === 'string') {
             return {
@@ -85,7 +79,6 @@ function normalizeLinkedInExperience(items = []) {
                 source: 'linkedin',
             };
         }
-
         return {
             role: item.role || item.title || item.position || item.jobTitle || item.designation || 'Professional Update',
             organization: item.organization || item.company || item.employer || 'LinkedIn',
@@ -97,10 +90,7 @@ function normalizeLinkedInExperience(items = []) {
 }
 
 function normalizeLinkedInSkills(items = []) {
-    if (!Array.isArray(items)) {
-        return [];
-    }
-
+    if (!Array.isArray(items)) return [];
     return items.map((skill) => ({
         category: skill.category || 'LinkedIn Skills',
         items: Array.isArray(skill.items) ? skill.items : [skill.name || skill].filter(Boolean),
@@ -155,7 +145,7 @@ async function syncGitHub() {
         if (!reposRes.ok) throw new Error(`GitHub repos lookup failed: ${reposRes.status}`);
         const repos = await reposRes.json();
 
-        const githubRepos = repos.map((repo) => ({
+        state.githubRepos = repos.map((repo) => ({
             name: repo.name,
             description: repo.description || 'Repository updated recently.',
             homepage: repo.homepage || null,
@@ -166,7 +156,6 @@ async function syncGitHub() {
             updated_at: repo.updated_at,
         }));
 
-        state.githubRepos = githubRepos;
         state.githubStats = {
             login: user.login,
             public_repos: user.public_repos || 0,
@@ -230,26 +219,33 @@ async function syncSources() {
         await syncLinkedIn();
         state.syncedAt = new Date().toISOString();
         
-        // FIXED: Safely write cache files inside the permissible environment path
-        await fs.mkdir(dataDir, { recursive: true });
-        await fs.writeFile(cachePath, JSON.stringify({
-            syncedAt: state.syncedAt,
-            githubActivity: state.githubActivity,
-            linkedinActivity: state.linkedinActivity,
-            githubStats: state.githubStats,
-            lastError: state.lastError,
-        }, null, 2));
+        // Safe check for Vercel read-only permissions
+        try {
+            await fs.mkdir(dataDir, { recursive: true });
+            await fs.writeFile(cachePath, JSON.stringify({
+                syncedAt: state.syncedAt,
+                githubActivity: state.githubActivity,
+                linkedinActivity: state.linkedinActivity,
+                githubStats: state.githubStats,
+                lastError: state.lastError,
+            }, null, 2));
+        } catch (writeError) {
+            console.warn("Disk writing skipped (Read-only Serverless Mode Enabled):", writeError.message);
+        }
     } finally {
         syncInFlight = false;
     }
 }
 
 app.get('/', async (req, res) => {
-    await syncSources();
-    res.render('index', {
-        state,
-        titleCase: toTitleCase,
-    });
+    // If running on Vercel, just render the current static/cached state data
+    // instead of blocking execution trying to parse file writes
+    if (isVercel && state.syncedAt) {
+        res.render('index', { state, titleCase: toTitleCase });
+    } else {
+        await syncSources();
+        res.render('index', { state, titleCase: toTitleCase });
+    }
 });
 
 app.get('/api/refresh', async (req, res) => {
@@ -258,18 +254,18 @@ app.get('/api/refresh', async (req, res) => {
 });
 
 app.get('/api/linkedin-status', async (req, res) => {
-    await syncSources();
+    if (!state.syncedAt) await loadBaseData();
     const lastUpdated = state.linkedinActivity?.[0]?.at || state.syncedAt || new Date().toISOString();
     res.json({
         title: 'Professional profile active',
-        text: `${state.linkedinHighlights.length} LinkedIn highlights and updates are ready to view. Last sync ${new Date(lastUpdated).toLocaleString()}.`,
+        text: `${state.linkedinHighlights.length} LinkedIn highlights and updates are ready to view.`,
         highlights: state.linkedinHighlights.length,
         lastUpdated,
     });
 });
 
 app.get('/api/linkedin-feed', async (req, res) => {
-    await syncSources();
+    if (!state.syncedAt) await loadBaseData();
     res.json({
         profile: state.profile,
         highlights: state.linkedinHighlights,
@@ -289,109 +285,37 @@ app.post('/api/linkedin-update', async (req, res) => {
         at: new Date().toISOString(),
     };
 
-    const incomingExperience = normalizeLinkedInExperience(
-        payload.experience || payload.experiences || payload.workExperience || payload.positions || []
-    );
+    const incomingExperience = normalizeLinkedInExperience(payload.experience || []);
     const experienceEntry = incomingExperience[0] || {
         role: payload.role || 'Professional update',
         organization: payload.organization || 'LinkedIn',
         period: payload.period || 'Now',
-        summary: payload.summary || 'Added from the portfolio LinkedIn sync form.',
+        summary: payload.summary || 'Added from sync form.',
         source: 'linkedin',
     };
 
-    const updated = {
-        profile: { ...(linkedInData.profile || {}), ...(payload.profile || {}) },
-        highlights: [entry, ...(linkedInData.highlights || [])].slice(0, 6),
-        activity: [{ type: 'linkedin', title: entry.title, summary: entry.summary, at: entry.at }, ...(linkedInData.activity || [])].slice(0, 8),
-        experience: [experienceEntry, ...normalizeLinkedInExperience(linkedInData.experience || linkedInData.experiences || linkedInData.workExperience || linkedInData.positions || []), ...incomingExperience.slice(1)].slice(0, 6),
-        education: linkedInData.education || [],
-        skills: [
-            ...(linkedInData.skills || []),
-            ...(payload.skills ? [{ category: 'LinkedIn Skills', items: payload.skills.split(',').map((item) => item.trim()).filter(Boolean), source: 'linkedin' }] : []),
-        ].slice(0, 6),
-    };
-
-    // FIXED: Writes successfully inside permissions parameters now
-    await fs.mkdir(dataDir, { recursive: true });
-    await fs.writeFile(linkedinPath, JSON.stringify(updated, null, 2));
-    
-    state.profile = { ...state.profile, ...updated.profile };
-    state.linkedinHighlights = updated.highlights;
-    state.linkedinActivity = updated.activity;
-    state.skills = [
-        ...(state.skills.filter((item) => item.source !== 'linkedin')),
-        ...((updated.skills || []).map((skill) => ({ ...skill, source: 'linkedin' }))),
-    ];
-    state.experience = [experienceEntry, ...state.experience.filter((item) => item.source !== 'linkedin')].slice(0, 8);
+    state.profile = { ...state.profile, ...(payload.profile || {}) };
+    state.linkedinHighlights = [entry, ...state.linkedinHighlights].slice(0, 6);
     state.syncedAt = new Date().toISOString();
 
     res.json({ ok: true, update: entry, experience: experienceEntry });
 });
 
 app.post('/api/webhooks/github', (req, res) => {
-    const event = req.get('X-GitHub-Event') || 'ping';
     const payload = req.body || {};
     const entry = {
         type: 'github',
-        event,
+        event: req.get('X-GitHub-Event') || 'ping',
         actor: payload.sender?.login || 'unknown',
         repo: payload.repository?.full_name || 'unknown',
-        action: payload.action || 'received',
         at: new Date().toISOString(),
     };
     state.githubActivity = [entry, ...state.githubActivity].slice(0, 6);
-    state.syncedAt = new Date().toISOString();
     res.json({ ok: true, received: entry });
 });
 
-app.post('/api/webhooks/linkedin', async (req, res) => {
-    const payload = req.body || {};
-    const entry = {
-        type: 'linkedin',
-        title: payload.title || 'LinkedIn update',
-        summary: payload.summary || 'A new professional update was received.',
-        at: new Date().toISOString(),
-    };
-
-    const professionalEntry = {
-        role: payload.role || 'Professional Update',
-        organization: payload.organization || 'LinkedIn',
-        period: payload.period || 'Now',
-        summary: payload.summary || 'Updated from LinkedIn webhook.',
-        source: 'linkedin',
-    };
-
-    const incomingSkills = Array.isArray(payload.skills)
-        ? payload.skills
-        : typeof payload.skills === 'string'
-            ? payload.skills.split(',').map((item) => item.trim()).filter(Boolean)
-            : [];
-
-    state.linkedinActivity = [entry, ...state.linkedinActivity].slice(0, 6);
-    state.linkedinHighlights = [
-        { title: entry.title, summary: entry.summary },
-        ...state.linkedinHighlights,
-    ].slice(0, 6);
-    state.skills = [...state.skills.filter((item) => item.source !== 'linkedin'), ...(incomingSkills.length ? [{ category: 'LinkedIn Skills', items: incomingSkills, source: 'linkedin' }] : [])];
-    state.experience = [professionalEntry, ...state.experience.filter((item) => item.source !== 'linkedin')];
-    state.syncedAt = new Date().toISOString();
-
-    await fs.mkdir(dataDir, { recursive: true });
-    await fs.writeFile(linkedinPath, JSON.stringify({
-        profile: state.profile,
-        highlights: state.linkedinHighlights,
-        activity: state.linkedinActivity,
-        experience: state.experience.filter((item) => item.source === 'linkedin'),
-        education: [],
-        skills: state.skills.filter((item) => item.source === 'linkedin'),
-    }, null, 2));
-
-    res.json({ ok: true, received: entry });
-});
-
-// FIXED: Condition block wraps listener + background sync to drop execution payload on Vercel
-if (!isProd) {
+// Disable the polling loop completely on Vercel architectures
+if (!isVercel) {
     app.listen(port, () => {
         console.log(`Portfolio SSR server running at http://localhost:${port}`);
     });
