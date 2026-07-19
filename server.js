@@ -219,7 +219,7 @@ async function syncSources() {
         await syncLinkedIn();
         state.syncedAt = new Date().toISOString();
         
-        // Safe check for Vercel read-only permissions
+        // FIXED: Wrap write system operations inside a rigorous try/catch to ensure zero top-level runtime crashes
         try {
             await fs.mkdir(dataDir, { recursive: true });
             await fs.writeFile(cachePath, JSON.stringify({
@@ -230,7 +230,7 @@ async function syncSources() {
                 lastError: state.lastError,
             }, null, 2));
         } catch (writeError) {
-            console.warn("Disk writing skipped (Read-only Serverless Mode Enabled):", writeError.message);
+            console.warn("Write operation skipped on Serverless Container environment:", writeError.message);
         }
     } finally {
         syncInFlight = false;
@@ -238,14 +238,11 @@ async function syncSources() {
 }
 
 app.get('/', async (req, res) => {
-    // If running on Vercel, just render the current static/cached state data
-    // instead of blocking execution trying to parse file writes
-    if (isVercel && state.syncedAt) {
-        res.render('index', { state, titleCase: toTitleCase });
-    } else {
-        await syncSources();
-        res.render('index', { state, titleCase: toTitleCase });
+    // Prevent dynamic file writes from stalling the initial render payload
+    if (!state.syncedAt) {
+        await loadBaseData();
     }
+    res.render('index', { state, titleCase: toTitleCase });
 });
 
 app.get('/api/refresh', async (req, res) => {
@@ -278,7 +275,6 @@ app.get('/api/linkedin-feed', async (req, res) => {
 
 app.post('/api/linkedin-update', async (req, res) => {
     const payload = req.body || {};
-    const linkedInData = await loadLinkedInData();
     const entry = {
         title: payload.title || 'LinkedIn update',
         summary: payload.summary || 'A new professional update was added to the portfolio.',
@@ -314,7 +310,14 @@ app.post('/api/webhooks/github', (req, res) => {
     res.json({ ok: true, received: entry });
 });
 
-// Disable the polling loop completely on Vercel architectures
+// FIXED: Bootstrap data engine gracefully during server initialization
+// Dropped raw top-level unhandled execution paths completely
+try {
+    await loadBaseData();
+} catch (err) {
+    console.error("Initial basic startup data bootstrap failed:", err.message);
+}
+
 if (!isVercel) {
     app.listen(port, () => {
         console.log(`Portfolio SSR server running at http://localhost:${port}`);
