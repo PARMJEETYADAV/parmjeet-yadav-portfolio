@@ -1,0 +1,25 @@
+{
+  "syncedAt": "2026-07-19T17:16:33.013Z",
+  "githubActivity": [],
+  "linkedinActivity": [
+    {
+      "type": "linkedin",
+      "title": "LinkedIn skills sync",
+      "summary": "Added new analytics and AI skills from LinkedIn",
+      "at": "2026-07-19T16:38:37.216Z"
+    },
+    {
+      "type": "linkedin",
+      "title": "New LinkedIn update",
+      "summary": "I just shared a new analytics project update.",
+      "at": "2026-07-19T16:36:29.815Z"
+    },
+    {
+      "title": "Professional profile active",
+      "summary": "LinkedIn presence is connected and available for live portfolio updates.",
+      "at": "2026-07-19T12:00:00.000Z"
+    }
+  ],
+  "githubStats": {},
+  "lastError": "fetch failed"
+}

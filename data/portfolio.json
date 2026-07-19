@@ -1,0 +1,106 @@
+{
+    "profile": {
+        "name": "Parmjeet Yadav",
+        "title": "Data Analyst · Business Analyst · AI Enthusiast",
+        "summary": "I turn messy datasets and business objectives into clear strategic decisions, polished dashboards, and measurable impact for employers and collaborators.",
+        "location": "Haryana, India"
+    },
+    "skills": [
+        {
+            "category": "Analytics",
+            "items": [
+                "Python",
+                "SQL",
+                "Excel",
+                "Power BI",
+                "Tableau",
+                "Statistics"
+            ]
+        },
+        {
+            "category": "Applied AI",
+            "items": [
+                "Machine Learning",
+                "Generative AI",
+                "Prompt Engineering",
+                "LLMs",
+                "NLP"
+            ]
+        },
+        {
+            "category": "Business",
+            "items": [
+                "Requirements Gathering",
+                "Stakeholder Communication",
+                "BA Documentation",
+                "Process Mapping"
+            ]
+        },
+        {
+            "category": "Workflow",
+            "items": [
+                "Git",
+                "Docker",
+                "APIs",
+                "Automation",
+                "Data Storytelling"
+            ]
+        }
+    ],
+    "projects": [
+        {
+            "title": "Executive KPI Dashboard",
+            "type": "Analytics",
+            "description": "Built a polished decision-support dashboard that connected operational and financial KPIs for better business monitoring.",
+            "tags": [
+                "Power BI",
+                "SQL",
+                "Dashboard Design"
+            ]
+        },
+        {
+            "title": "AI-assisted Insight Assistant",
+            "type": "GenAI",
+            "description": "Created a lightweight assistant that summarizes trends, highlights anomalies, and generates executive-ready notes from analysis outputs.",
+            "tags": [
+                "Python",
+                "LLM",
+                "Automation"
+            ]
+        }
+    ],
+    "certifications": [
+        {
+            "title": "Data Analytics Foundations",
+            "issuer": "Coursera / Google",
+            "date": "2025"
+        },
+        {
+            "title": "Business Analyst Simulation",
+            "issuer": "Deloitte",
+            "date": "2024"
+        }
+    ],
+    "experience": [
+        {
+            "role": "Data Analyst Intern",
+            "organization": "Deloitte",
+            "period": "2024 – 2025",
+            "summary": "Delivered analysis and reporting that guided operational improvements and cross-team decision support."
+        },
+        {
+            "role": "Business Analyst Intern",
+            "organization": "Tata Group",
+            "period": "2023 – 2024",
+            "summary": "Translated business requirements into structured insights and workflow improvements for process optimization."
+        }
+    ],
+    "education": [
+        {
+            "degree": "B.Tech in Computer Science",
+            "institution": "University / College",
+            "period": "2022 – 2026"
+        }
+    ],
+    "githubRepos": []
+}

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <%= state.profile.name || 'Professional Portfolio' %> | Recruiter-ready SSR portfolio
+    </title>
+    <meta name="description"
+        content="A polished personal portfolio site rendered server-side with GitHub and LinkedIn sync for projects, skills, and certifications." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <nav class="nav-bar">
+                <div class="brand"> <span class="dot"></span>
+                    <%= state.profile.name || 'Your Name' %>
+                </div>
+                <div class="nav-links">
+                    <a href="#projects">Projects</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#experience">Experience</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </nav>
+
+            <div class="hero-grid">
+                <div>
+                    <p class="eyebrow">SSR portfolio • GitHub + LinkedIn sync</p>
+                    <h1>
+                        <%= state.profile.title || 'Business-minded analyst and builder' %>
+                    </h1>
+                    <p class="lead">
+                        <%= state.profile.summary
+                            || 'Delivering measurable impact through analytics, product thinking, and modern data workflows.'
+                            %>
+                    </p>
+                    <div class="cta-row">
+                        <a class="btn btn-primary" href="#projects">Explore work</a>
+                        <a class="btn btn-secondary" href="/Parmjeet_Yadav_Resume.pdf" target="_blank"
+                            rel="noopener">Download resume</a>
+                    </div>
+
+                    <div class="hero-badges">
+                        <span>⚡ Live GitHub polling</span>
+                        <span>🔄 LinkedIn sync hooks</span>
+                        <span>📈 Recruiter-ready layout</span>
+                    </div>
+                </div>
+
+                <aside class="hero-card">
+                    <img src="/profile-photo.jpeg" alt="Professional portrait" />
+                    <div class="hero-card-body">
+                        <h2>Sync status</h2>
+                        <p><strong>Repositories:</strong>
+                            <%= state.githubRepos.length %>
+                        </p>
+                        <p><strong>Highlights:</strong>
+                            <%= state.linkedinHighlights.length %>
+                        </p>
+                        <p><strong>Last sync:</strong>
+                            <%= state.syncedAt ? new Date(state.syncedAt).toLocaleString() : 'Awaiting first sync' %>
+                        </p>
+                        <div class="linkedin-status">
+                            <div class="linkedin-pill">● LinkedIn live</div>
+                            <div class="mini-card">
+                                <strong>Professional profile active</strong>
+                                <p>
+                                    <%= state.linkedinHighlights.length %> LinkedIn highlights and updates are ready to
+                                        view.
+                                </p>
+                                <a class="linkedin-link" href="https://www.linkedin.com" target="_blank"
+                                    rel="noopener">Open LinkedIn profile →</a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </header>
+
+        <main>
+            <section class="section stats-grid">
+                <article class="stat-card">
+                    <h3>GitHub snapshot</h3>
+                    <p><strong>
+                            <%= state.githubStats.public_repos || 0 %>
+                        </strong> public repos</p>
+                    <p><strong>
+                            <%= state.githubStats.followers || 0 %>
+                        </strong> followers</p>
+                    <p><strong>
+                            <%= state.githubStats.public_gists || 0 %>
+                        </strong> gists</p>
+                </article>
+                <article class="stat-card">
+                    <h3>LinkedIn signal</h3>
+                    <p><strong>
+                            <%= state.linkedinHighlights.length %>
+                        </strong> curated highlights</p>
+                    <p><strong>
+                            <%= state.experience.length %>
+                        </strong> experience items</p>
+                    <p><strong>
+                            <%= state.certifications.length %>
+                        </strong> certifications</p>
+                </article>
+                <article class="stat-card">
+                    <h3>Automation hooks</h3>
+                    <p>Webhook endpoint ready for GitHub events</p>
+                    <p>Polling endpoint available for LinkedIn updates</p>
+                    <p>Server-side render refresh on each visit</p>
+                </article>
+            </section>
+
+            <section class="section" id="projects">
+                <div class="section-heading">
+                    <p class="eyebrow">02 — featured work</p>
+                    <h2>Projects that show delivery, curiosity, and momentum.</h2>
+                </div>
+                <div class="card-grid">
+                    <% state.githubRepos.forEach((repo)=> { %>
+                        <article class="card">
+                            <div class="card-head">
+                                <h3>
+                                    <%= repo.name %>
+                                </h3>
+                                <span class="pill">
+                                    <%= repo.language %>
+                                </span>
+                            </div>
+                            <p>
+                                <%= repo.description %>
+                            </p>
+                            <div class="meta-row">
+                                <span>★ <%= repo.stargazers_count %></span>
+                                <span>♢ <%= repo.forks_count %></span>
+                                <span>
+                                    <%= new Date(repo.updated_at).toLocaleDateString() %>
+                                </span>
+                            </div>
+                            <a href="<%= repo.html_url %>" target="_blank" rel="noopener">Open repository →</a>
+                        </article>
+                        <% }) %>
+
+                            <% state.projects.forEach((project)=> { %>
+                                <article class="card">
+                                    <div class="card-head">
+                                        <h3>
+                                            <%= project.title %>
+                                        </h3>
+                                        <span class="pill">
+                                            <%= project.type || 'Case Study' %>
+                                        </span>
+                                    </div>
+                                    <p>
+                                        <%= project.description %>
+                                    </p>
+                                    <div class="tags">
+                                        <% (project.tags || []).forEach((tag)=> { %>
+                                            <span>
+                                                <%= tag %>
+                                            </span>
+                                            <% }) %>
+                                    </div>
+                                </article>
+                                <% }) %>
+                </div>
+            </section>
+
+            <section class="section" id="skills">
+                <div class="section-heading">
+                    <p class="eyebrow">03 — capabilities</p>
+                    <h2>Skills aligned with hiring priorities: analytics, automation, and communication.</h2>
+                </div>
+                <div class="chip-grid">
+                    <% state.skills.forEach((skillGroup)=> { %>
+                        <article class="chip-card">
+                            <h3>
+                                <%= skillGroup.category %>
+                            </h3>
+                            <div class="tags">
+                                <% skillGroup.items.forEach((item)=> { %>
+                                    <span>
+                                        <%= item %>
+                                    </span>
+                                    <% }) %>
+                            </div>
+                        </article>
+                        <% }) %>
+                </div>
+            </section>
+
+            <section class="section" id="linkedin-sync">
+                <div class="section-heading">
+                    <p class="eyebrow">04 — LinkedIn sync</p>
+                    <h2>Publish a fresh professional update and show it immediately on the portfolio.</h2>
+                </div>
+                <div class="linkedin-sync-grid">
+                    <form id="linkedinUpdateForm" class="linkedin-form">
+                        <input type="text" name="title" placeholder="Update title" required />
+                        <textarea name="summary" rows="3" placeholder="What changed?" required></textarea>
+                        <div class="linkedin-form-row">
+                            <input type="text" name="role" placeholder="Role" />
+                            <input type="text" name="organization" placeholder="Organization" />
+                            <input type="text" name="period" placeholder="Period" />
+                        </div>
+                        <button type="submit">Publish to portfolio</button>
+                        <p id="linkedinFormStatus" class="muted"></p>
+                    </form>
+                    <div class="linkedin-feed-card">
+                        <h3>Latest LinkedIn signal</h3>
+                        <div id="linkedinFeedStatus" class="muted">Loading updates…</div>
+                        <div id="linkedinFeedItems" class="linkedin-feed-items"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="experience">
+                <div class="section-heading">
+                    <p class="eyebrow">05 — experience</p>
+                    <h2>Professional growth that blends data discipline with business context.</h2>
+                </div>
+                <div class="timeline">
+                    <% state.experience.forEach((item)=> { %>
+                        <article class="timeline-item">
+                            <div class="timeline-date">
+                                <%= item.period || 'Now' %>
+                            </div>
+                            <div>
+                                <div class="timeline-head">
+                                    <h3>
+                                        <%= item.role || item.title || 'Professional Update' %>
+                                    </h3>
+                                    <% if (item.source==='linkedin' ) { %>
+                                        <span class="pill">LinkedIn</span>
+                                        <% } %>
+                                </div>
+                                <p class="muted">
+                                    <%= item.organization || item.company || 'LinkedIn' %>
+                                </p>
+                                <p>
+                                    <%= item.summary || item.description || 'Updated from LinkedIn.' %>
+                                </p>
+                            </div>
+                        </article>
+                        <% }) %>
+                </div>
+                <div id="linkedinExperienceItems" class="linkedin-experience-items"></div>
+            </section>
+
+            <section class="section" id="certifications">
+                <div class="section-heading">
+                    <p class="eyebrow">06 — credentials</p>
+                    <h2>Certifications and education that evidence continuous learning.</h2>
+                </div>
+                <div class="card-grid">
+                    <% state.certifications.forEach((cert)=> { %>
+                        <article class="card">
+                            <h3>
+                                <%= cert.title %>
+                            </h3>
+                            <p class="muted">
+                                <%= cert.issuer %>
+                            </p>
+                            <p>
+                                <%= cert.date %>
+                            </p>
+                        </article>
+                        <% }) %>
+                </div>
+                <div class="education-grid">
+                    <% state.education.forEach((edu)=> { %>
+                        <article class="card">
+                            <h3>
+                                <%= edu.degree %>
+                            </h3>
+                            <p class="muted">
+                                <%= edu.institution %>
+                            </p>
+                            <p>
+                                <%= edu.period %>
+                            </p>
+                        </article>
+                        <% }) %>
+                </div>
+            </section>
+
+            <section class="section" id="activity">
+                <div class="section-heading">
+                    <p class="eyebrow">07 — live activity</p>
+                    <h2>Recent GitHub and LinkedIn updates flowing into the page.</h2>
+                </div>
+                <div class="terminal-card">
+                    <% [...state.githubActivity, ...state.linkedinActivity].slice(0, 8).forEach((entry)=> { %>
+                        <div class="terminal-line">
+                            <span class="pill">
+                                <%= entry.type %>
+                            </span>
+                            <span>
+                                <%= entry.event || entry.title || 'Update' %>
+                            </span>
+                            <span class="muted">
+                                <%= new Date(entry.at).toLocaleString() %>
+                            </span>
+                        </div>
+                        <% }) %>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer" id="contact">
+            <h2>Open to opportunities, partnerships, and thoughtful conversations.</h2>
+            <div class="footer-links">
+                <a href="mailto:parmjeet@example.com">parmjeet@example.com</a>
+                <a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function renderLinkedInFeed(data) {
+            const feedStatus = document.getElementById('linkedinFeedStatus');
+            const feedItems = document.getElementById('linkedinFeedItems');
+            const experienceItems = document.getElementById('linkedinExperienceItems');
+            const highlights = data.highlights || [];
+            const experiences = data.experience || [];
+
+            if (!highlights.length) {
+                feedStatus.textContent = 'No LinkedIn highlights yet. Add one to populate the feed.';
+            } else {
+                feedStatus.textContent = '';
+            }
+
+            feedItems.innerHTML = highlights.slice(0, 4).map((item) => `
+                <div>
+                    <strong>${item.title || 'LinkedIn update'}</strong>
+                    <p class="muted">${item.summary || ''}</p>
+                </div>
+            `).join('');
+
+            experienceItems.innerHTML = experiences.slice(0, 4).map((item) => `
+                <article class="experience-card">
+                    <div class="experience-card-head">
+                        <strong>${item.role || item.title || 'Professional update'}</strong>
+                        <span class="pill">LinkedIn</span>
+                    </div>
+                    <p class="muted">${item.organization || item.company || 'LinkedIn'} • ${item.period || 'Now'}</p>
+                    <p>${item.summary || item.description || 'Updated from your LinkedIn sync flow.'}</p>
+                </article>
+            `).join('');
+        }
+
+        async function loadLinkedInFeed() {
+            try {
+                const response = await fetch('/api/linkedin-feed');
+                if (!response.ok) throw new Error('Unable to load LinkedIn feed');
+                const data = await response.json();
+                renderLinkedInFeed(data);
+            } catch (error) {
+                document.getElementById('linkedinFeedStatus').textContent = 'Feed unavailable. Add an update to seed it.';
+            }
+        }
+
+        async function submitLinkedInUpdate(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const status = document.getElementById('linkedinFormStatus');
+            const payload = Object.fromEntries(new FormData(form).entries());
+            status.textContent = 'Publishing…';
+
+            try {
+                const response = await fetch('/api/linkedin-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                if (!response.ok) throw new Error('Publish failed');
+                form.reset();
+                await loadLinkedInFeed();
+                status.textContent = 'Published to the portfolio.';
+            } catch (error) {
+                status.textContent = 'Unable to publish right now.';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('linkedinUpdateForm');
+            if (form) {
+                form.addEventListener('submit', submitLinkedInUpdate);
+            }
+            loadLinkedInFeed();
+        });
+    </script>
+</body>
+
+</html>
