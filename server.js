@@ -12,6 +12,11 @@ const port = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+// Keep the portrait available at a stable route in serverless deployments.
+// This explicit route avoids relying on the platform's static-file discovery.
+app.get('/profile-photo.jpeg', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'profile-photo.jpeg'));
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 app.use(express.json());
