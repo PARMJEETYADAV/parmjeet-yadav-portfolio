@@ -1,0 +1,62 @@
+{
+  "profile": {
+    "name": "Parmjeet Yadav",
+    "title": "Data Analyst · Business Analyst · AI Enthusiast"
+  },
+  "highlights": [
+    {
+      "title": "LinkedIn skills sync",
+      "summary": "Added new analytics and AI skills from LinkedIn",
+      "at": "2026-07-19T16:38:37.216Z"
+    },
+    {
+      "title": "New LinkedIn update",
+      "summary": "I just shared a new analytics project update.",
+      "at": "2026-07-19T16:36:29.815Z"
+    },
+    {
+      "title": "Sharing case studies in analytics and AI",
+      "summary": "Recent posts highlight dashboard design, business analysis workflow, and AI-assisted problem solving."
+    },
+    {
+      "title": "Building recruiter-ready portfolio stories",
+      "summary": "A focused update on turning data work into practical decision support and measurable outcomes."
+    }
+  ],
+  "activity": [
+    {
+      "type": "linkedin",
+      "title": "LinkedIn skills sync",
+      "summary": "Added new analytics and AI skills from LinkedIn",
+      "at": "2026-07-19T16:38:37.216Z"
+    },
+    {
+      "type": "linkedin",
+      "title": "New LinkedIn update",
+      "summary": "I just shared a new analytics project update.",
+      "at": "2026-07-19T16:36:29.815Z"
+    },
+    {
+      "title": "Professional profile active",
+      "summary": "LinkedIn presence is connected and available for live portfolio updates.",
+      "at": "2026-07-19T12:00:00.000Z"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Business Analyst",
+      "organization": "LinkedIn",
+      "period": "Now",
+      "summary": "Added new analytics and AI skills from LinkedIn",
+      "source": "linkedin"
+    },
+    {
+      "role": "Data Analyst",
+      "organization": "LinkedIn",
+      "period": "Now",
+      "summary": "I just shared a new analytics project update.",
+      "source": "linkedin"
+    }
+  ],
+  "education": []
+}

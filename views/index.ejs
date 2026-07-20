@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <%= state.profile.name || 'Professional Portfolio' %> | Recruiter-ready SSR portfolio
+    </title>
+    <meta name="description"
+        content="A polished personal portfolio site rendered server-side with GitHub sync for projects, skills, and certifications." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <nav class="nav-bar">
+                <div class="brand"> <span class="dot"></span>
+                    <%= state.profile.name || 'Your Name' %>
+                </div>
+                <div class="nav-links">
+                    <a href="#projects">Projects</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#experience">Experience</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </nav>
+
+            <div class="hero-grid">
+                <div>
+                    <p class="eyebrow">SSR portfolio • GitHub sync</p>
+                    <h1>
+                        <%= state.profile.title || 'Business-minded analyst and builder' %>
+                    </h1>
+                    <p class="lead">
+                        <%= state.profile.summary
+                            || 'Delivering measurable impact through analytics, product thinking, and modern data workflows.'
+                            %>
+                    </p>
+                    <div class="cta-row">
+                        <a class="btn btn-primary" href="#projects">Explore work</a>
+                        <a class="btn btn-secondary" href="/Parmjeet_Yadav_Resume.pdf" target="_blank"
+                            rel="noopener">Download resume</a>
+                    </div>
+
+                    <div class="hero-badges">
+                        <span>⚡ Live GitHub polling</span>
+                        <span> Recruiter-ready layout</span>
+                    </div>
+                </div>
+
+                <aside class="hero-card">
+                    <img src="/profile-photo.jpeg" alt="Professional portrait" />
+                    <div class="hero-card-body">
+                        <h2>Sync status</h2>
+                        <p><strong>Repositories:</strong>
+                            <%= state.githubRepos.length %>
+                        </p>
+                        <p><strong>Last sync:</strong>
+                            <%= state.syncedAt ? new Date(state.syncedAt).toLocaleString() : 'Awaiting first sync' %>
+                        </p>
+                    </div>
+                </aside>
+            </div>
+        </header>
+
+        <main>
+            <section class="section stats-grid">
+                <article class="stat-card">
+                    <h3>GitHub snapshot</h3>
+                    <p><strong>
+                            <%= state.githubStats.public_repos || 0 %>
+                        </strong> public repos</p>
+                    <p><strong>
+                            <%= state.githubStats.followers || 0 %>
+                        </strong> followers</p>
+                    <p><strong>
+                            <%= state.githubStats.public_gists || 0 %>
+                        </strong> gists</p>
+                </article>
+                <article class="stat-card">
+                    <h3>Portfolio Stats</h3>
+                    <p><strong>
+                            <%= state.experience.length %>
+                        </strong> experience items</p>
+                    <p><strong>
+                            <%= state.certifications.length %>
+                        </strong> certifications</p>
+                    <p><strong>
+                            <%= state.projects.length %>
+                        </strong> featured projects</p>
+                </article>
+                <article class="stat-card">
+                    <h3>Automation hooks</h3>
+                    <p>Webhook endpoint ready for GitHub events</p>
+                    <p>Server-side render refresh on each visit</p>
+                    <p>Automatic GitHub repository sync</p>
+                </article>
+            </section>
+
+            <section class="section" id="projects">
+                <div class="section-heading">
+                    <p class="eyebrow">02 — featured work</p>
+                    <h2>Projects that show delivery, curiosity, and momentum.</h2>
+                </div>
+                <div class="card-grid">
+                    <% state.githubRepos.forEach((repo)=> { %>
+                        <article class="card">
+                            <div class="card-head">
+                                <h3>
+                                    <%= repo.name %>
+                                </h3>
+                                <span class="pill">
+                                    <%= repo.language %>
+                                </span>
+                            </div>
+                            <p>
+                                <%= repo.description %>
+                            </p>
+                            <div class="meta-row">
+                                <span>★ <%= repo.stargazers_count %></span>
+                                <span>♢ <%= repo.forks_count %></span>
+                                <span>
+                                    <%= new Date(repo.updated_at).toLocaleDateString() %>
+                                </span>
+                            </div>
+                            <a href="<%= repo.html_url %>" target="_blank" rel="noopener">Open repository →</a>
+                        </article>
+                        <% }) %>
+
+                            <% state.projects.forEach((project)=> { %>
+                                <article class="card">
+                                    <div class="card-head">
+                                        <h3>
+                                            <%= project.title %>
+                                        </h3>
+                                        <span class="pill">
+                                            <%= project.type || 'Case Study' %>
+                                        </span>
+                                    </div>
+                                    <p>
+                                        <%= project.description %>
+                                    </p>
+                                    <div class="tags">
+                                        <% (project.tags || []).forEach((tag)=> { %>
+                                            <span>
+                                                <%= tag %>
+                                            </span>
+                                            <% }) %>
+                                    </div>
+                                </article>
+                                <% }) %>
+                </div>
+            </section>
+
+            <section class="section" id="skills">
+                <div class="section-heading">
+                    <p class="eyebrow">03 — capabilities</p>
+                    <h2>Skills aligned with hiring priorities: analytics, automation, and communication.</h2>
+                </div>
+                <div class="chip-grid">
+                    <% state.skills.forEach((skillGroup)=> { %>
+                        <article class="chip-card">
+                            <h3>
+                                <%= skillGroup.category %>
+                            </h3>
+                            <div class="tags">
+                                <% skillGroup.items.forEach((item)=> { %>
+                                    <span>
+                                        <%= item %>
+                                    </span>
+                                    <% }) %>
+                            </div>
+                        </article>
+                        <% }) %>
+                </div>
+            </section>
+
+
+            <section class="section" id="experience">
+                <div class="section-heading">
+                    <p class="eyebrow">05 — experience</p>
+                    <h2>Professional growth that blends data discipline with business context.</h2>
+                </div>
+                <div class="timeline">
+                    <% state.experience.forEach((item)=> { %>
+                        <article class="timeline-item">
+                            <div class="timeline-date">
+                                <%= item.period || 'Now' %>
+                            </div>
+                            <div>
+                                <div class="timeline-head">
+                                    <h3>
+                                        <%= item.role || item.title || 'Professional Update' %>
+                                    </h3>
+                                </div>
+                                <p class="muted">
+                                    <%= item.organization || item.company || 'Organization' %>
+                                </p>
+                                <p>
+                                    <%= item.summary || item.description || 'Professional experience.' %>
+                                </p>
+                            </div>
+                        </article>
+                        <% }) %>
+                </div>
+            </section>
+
+            <section class="section" id="certifications">
+                <div class="section-heading">
+                    <p class="eyebrow">06 — credentials</p>
+                    <h2>Certifications and education that evidence continuous learning.</h2>
+                </div>
+                <div class="card-grid">
+                    <% state.certifications.forEach((cert)=> { %>
+                        <article class="card">
+                            <h3>
+                                <%= cert.title %>
+                            </h3>
+                            <p class="muted">
+                                <%= cert.issuer %>
+                            </p>
+                            <p>
+                                <%= cert.date %>
+                            </p>
+                        </article>
+                        <% }) %>
+                </div>
+                <div class="education-grid">
+                    <% state.education.forEach((edu)=> { %>
+                        <article class="card">
+                            <h3>
+                                <%= edu.degree %>
+                            </h3>
+                            <p class="muted">
+                                <%= edu.institution %>
+                            </p>
+                            <p>
+                                <%= edu.period %>
+                            </p>
+                        </article>
+                        <% }) %>
+                </div>
+            </section>
+
+            <section class="section" id="activity">
+                <div class="section-heading">
+                    <p class="eyebrow">06 — live activity</p>
+                    <h2>Recent GitHub updates flowing into the page.</h2>
+                </div>
+                <div class="terminal-card">
+                    <% state.githubActivity.slice(0, 8).forEach((entry)=> { %>
+                        <div class="terminal-line">
+                            <span class="pill">
+                                <%= entry.type %>
+                            </span>
+                            <span>
+                                <%= entry.event || entry.title || 'Update' %>
+                            </span>
+                            <span class="muted">
+                                <%= new Date(entry.at).toLocaleString() %>
+                            </span>
+                        </div>
+                        <% }) %>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer" id="contact">
+            <h2>Open to opportunities, partnerships, and thoughtful conversations.</h2>
+            <div class="footer-links">
+                <a href="mailto:parmjeet@example.com">parmjeet@example.com</a>
+                <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // LinkedIn-related JavaScript removed - no longer fetching LinkedIn data
+    </script>
+</body>
+
+</html>
