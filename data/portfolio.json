@@ -71,14 +71,28 @@
     ],
     "certifications": [
         {
-            "title": "Data Analytics Foundations",
-            "issuer": "Coursera / Google",
-            "date": "2025"
+            "title": "GenAI Powered Data Analytics Job Simulation — EDA, risk profiling, predictive delinquency modeling, AI-driven collections strategy",
+            "issuer": "Tata (Forage)",
+            "date": "Jun 2026",
+            "certificateUrl": "https://drive.google.com/file/d/1rSFl2EdKg8aTQ8I0_kiMgbe2xudv0ZzJ/view"
         },
         {
-            "title": "Business Analyst Simulation",
-            "issuer": "Deloitte",
-            "date": "2024"
+            "title": "Data Analytics Job Simulation — data analysis & forensic technology for business investigations",
+            "issuer": "Deloitte (Forage)",
+            "date": "Jul 2026",
+            "certificateUrl": "https://drive.google.com/file/d/1mq7Eng55U9jvsTsiRItDppGn5yd8eBBi/view"
+        },
+        {
+            "title": "Cybersecurity Analyst Job Simulation — IAM fundamentals, strategy assessment & solution design",
+            "issuer": "Tata (Forage)",
+            "date": "Jun 2026",
+            "certificateUrl": "https://drive.google.com/file/d/1hlNWPDmLJAHED4zonf_EX3pYBxfHgcAb/view"
+        },
+        {
+            "title": "Data Science Internship Certificate",
+            "issuer": "Prodigy InfoTech",
+            "date": "Apr 2025",
+            "certificateUrl": "https://drive.google.com/file/d/1FuESJVPecgRW042VJgSw4BFmkUAAS700/view"
         }
     ],
     "experience": [

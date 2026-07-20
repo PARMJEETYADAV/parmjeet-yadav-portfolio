@@ -228,6 +228,9 @@
                             <p>
                                 <%= cert.date %>
                             </p>
+                            <% if (cert.certificateUrl) { %>
+                                <p><a href="<%= cert.certificateUrl %>" target="_blank" rel="noopener">View certificate →</a></p>
+                            <% } %>
                         </article>
                         <% }) %>
                 </div>

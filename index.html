@@ -768,6 +768,19 @@
       color: var(--teal);
     }
 
+    .cert-card .cert-link {
+      display: inline-block;
+      margin-top: 14px;
+      color: var(--gold);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .cert-card .cert-link:hover {
+      text-decoration: underline;
+    }
+
     .linkedin-note {
       margin-top: 26px;
       padding: 18px 20px;
@@ -1352,10 +1365,10 @@
       ],
 
       certifications: [
-        { issuer: "Tata (Forage)", title: "GenAI Powered Data Analytics Job Simulation — EDA, risk profiling, predictive delinquency modeling, AI-driven collections strategy", date: "Jun 2026" },
-        { issuer: "Deloitte (Forage)", title: "Data Analytics Job Simulation — data analysis & forensic technology for business investigations", date: "Jul 2026" },
-        { issuer: "Tata (Forage)", title: "Cybersecurity Analyst Job Simulation — IAM fundamentals, strategy assessment & solution design", date: "Jun 2026" },
-        { issuer: "Prodigy InfoTech", title: "Data Science Internship Certificate", date: "Apr 2025" },
+        { issuer: "Tata (Forage)", title: "GenAI Powered Data Analytics Job Simulation — EDA, risk profiling, predictive delinquency modeling, AI-driven collections strategy", date: "Jun 2026", certificateUrl: "https://drive.google.com/file/d/1rSFl2EdKg8aTQ8I0_kiMgbe2xudv0ZzJ/view" },
+        { issuer: "Deloitte (Forage)", title: "Data Analytics Job Simulation — data analysis & forensic technology for business investigations", date: "Jul 2026", certificateUrl: "https://drive.google.com/file/d/1mq7Eng55U9jvsTsiRItDppGn5yd8eBBi/view" },
+        { issuer: "Tata (Forage)", title: "Cybersecurity Analyst Job Simulation — IAM fundamentals, strategy assessment & solution design", date: "Jun 2026", certificateUrl: "https://drive.google.com/file/d/1hlNWPDmLJAHED4zonf_EX3pYBxfHgcAb/view" },
+        { issuer: "Prodigy InfoTech", title: "Data Science Internship Certificate", date: "Apr 2025", certificateUrl: "https://drive.google.com/file/d/1FuESJVPecgRW042VJgSw4BFmkUAAS700/view" },
         { issuer: "AICTE Indovation Centre, Ministry of Education", title: "Graphic Design Internship Certificate", date: "May – Jul 2025" },
         { issuer: "Coursera / NPTEL", title: "Machine Learning, Python, SQL & Data Analyst", date: "Ongoing" }
       ],
@@ -1473,6 +1486,7 @@
       <div class="cert-issuer mono">${escapeHtml(c.issuer)}</div>
       <h4>${escapeHtml(c.title)}</h4>
       <div class="cert-date">${escapeHtml(c.date)}</div>
+      ${c.certificateUrl ? `<a class="cert-link" href="${c.certificateUrl}" target="_blank" rel="noopener">View certificate →</a>` : ''}
     </div>`).join('');
 
       const feat = document.getElementById('featuredProjects');
